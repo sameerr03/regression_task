@@ -91,7 +91,12 @@ def encode_vehicle_class(df):
         Dataset with new dummy varaiable columns for vehicle class.
 
     '''
-    return pd.get_dummies(df, columns = ['VEHICLE CLASS'], prefix = 'VC', drop_first=True)
+    df_encoded = pd.get_dummies(df, columns = ['VEHICLE CLASS'], prefix = 'VC', drop_first=True)
+    
+    # Convert boolean dummy variables to binary (0 and 1)
+    dummy_columns = [col for col in df_encoded.columns if col.startswith('VC_')]
+    df_encoded[dummy_columns] = df_encoded[dummy_columns].astype(int)
+    return df_encoded
 
 class MinMaxScaler:
     def __init__(self):
