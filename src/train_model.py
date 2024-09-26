@@ -197,9 +197,8 @@ def main():
     df = load_pdata(data_path)
     
     # Determine features used for regression
-    features = ['COEMISSIONS ', 'VC_MID-SIZE', 'VC_MINIVAN',
-           'VC_PICKUP_TRUCK', 'VC_SMALL_CAR', 'VC_STATION_WAGON', 'VC_SUV',
-           'VC_VAN', 'VC_VERY_SMALL_CAR']
+    features = ['COEMISSIONS ', 'VC_MID-SIZE', 'VC_PICKUP_TRUCK', 'VC_SMALL_CAR', 'VC_STATION_WAGON', 'VC_SUV',
+           'VC_VAN']
     target = 'FUEL CONSUMPTION'
     
     # Split the dataset
@@ -227,17 +226,17 @@ def main():
     print(f"R-squared Score: {r2:.4f}")
 
     # Save the model
-    model_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task\models\regression_model2.pkl"
+    model_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task\models\regression_model3.pkl"
     save_model(model, model_path)
     print(f"Model saved to {model_path}")
     
     # Save metrics
-    metrics_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task/results/train_metrics2.txt"
+    metrics_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task/results/train_metrics3.txt"
     save_metrics(mse, rmse, r2, metrics_path)
     print(f"Metrics saved to {metrics_path}")
   
     # Save predictions
-    predictions_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task/results/train_predictions2.csv"
+    predictions_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task/results/train_predictions3.csv"
     save_predictions(y_pred, predictions_path)
     print(f"Predictions saved to {predictions_path}")
     
