@@ -11,19 +11,34 @@ import numpy as np
 import os
 import pickle
 
-from data_preprocessing import group_vehicle_classes, encode_vehicle_class, MinMaxScaler
+from data_preprocessing import simplify_vehicle_classes, encode_vehicle_class, MinMaxScaler
 
 class LinearRegression:
     def __init__(self):
-        self.coefficiets = None
+        self.coefficients = None
         self.intercept = None
         
     def fit(self, X, Y):
+        '''
+        Fits the multiple linear regression model to the training data. Uses the normal equation to optimize intercept and coefficients. Will cause problems for uninvertable matrices
+
+        Parameters
+        ----------
+        X : np.ndarray
+            2D array of independant variables (feature matrix).
+        Y : np.ndarray
+            1D Array for the target variable - fuel consumption.
+
+        Returns
+        -------
+        None.
+
+        '''
         X = np.c_[np.ones((X.shape[0], 1)), X]
         try:
             self.coefficients = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(Y)
         except np.linalg.LinAlgError:
-            print("Error: Singular Matrix. consider uusing regularization or removing correlated features")
+            print("Error: Singular Matrix. consider using regularization or removing correlated features")
         
         self.intercept = self.coefficients[0]
         self.coefficients = self.coefficients[1:]
@@ -43,7 +58,7 @@ def load_data(data_path):
 
 def preprocess_data(df):
     df = df.dropna()
-    df = group_vehicle_classes(df)
+    df = simplify_vehicle_classes(df)
     df = encode_vehicle_class(df)
     return df
 
@@ -182,14 +197,12 @@ def main():
     args = parser.parse_args()
 
     try:
-        # Load the model
         model = load_model(args.model_path)
 
-        # Load and preprocess the data
         df = load_data(args.data_path)
         df = preprocess_data(df)
 
-        # Prepare features and true labels
+        # These vehicle class features were chosen based on their importance in prior exploratory analysis.
         features = ['COEMISSIONS ', 'VC_MID-SIZE', 'VC_MINIVAN',
                'VC_PICKUP_TRUCK', 'VC_SMALL_CAR', 'VC_STATION_WAGON', 'VC_SUV',
                'VC_VAN', 'VC_VERY_SMALL_CAR']
@@ -198,17 +211,14 @@ def main():
         
         X, Y = prepare_data(df, features, target)
         
-        # Make predictions
         y_pred = model.predict(X)
         
-        # Calculate and print model performance metrics
+        # Calculation of performance metrics
         mse = calculate_mse(Y.values, y_pred)
         rmse = calculate_rmse(Y.values, y_pred)
         r2 = calculate_r2(Y.values, y_pred)
         
-        
-        
-        # Save metrics and predictions
+        # Saving metrics and predictions
         save_metrics(mse, rmse, r2, args.metrics_output_path)
         save_predictions(y_pred, args.predictions_output_path)
 

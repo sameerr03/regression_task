@@ -11,7 +11,7 @@ import pickle
 
 def load_data(path):
     '''
-    Load data from a CSV file
+    Loads data from a CSV file
 
     Parameters
     ----------
@@ -25,14 +25,14 @@ def load_data(path):
     '''
     return pd.read_csv(path)
 
-def handle_missing_values(df):
+def drop_missing_observations(df):
     '''
-    Handles missing values
+    Drops missing observations(NaN values) from the dataset to ensure no missing value errors are thrown 
 
     Parameters
     ----------
     df : pd.DataFrame
-        Imported dataet.
+        Dataset that has been imported as a dataframe.
 
     Returns
     -------
@@ -42,14 +42,14 @@ def handle_missing_values(df):
     '''
     return df.dropna()
 
-def group_vehicle_classes(df):
+def simplify_vehicle_classes(df):
     '''
-    Groups vehicle classes to create fewer dummy variables
+    Simplifies the groupings of the vehicle classes so that fewer variables are necessary in the model
 
     Parameters
     ----------
     df : pd.DataFrame
-        Dataset.
+        Imported dataset with missing values removed.
 
     Returns
     -------
@@ -142,7 +142,7 @@ def scale_numerical_features(df, columns_to_scale):
 
 def preprocess_data(input_file, output_file, scaler_file, apply_scaling=False):
     '''
-    Preprocesses the dataset 
+    Loads, removes missing values, simplifies the vehicle classs and creates dummy variables for the original dataset before exporting it as a new csv file
 
     Parameters
     ----------
@@ -160,25 +160,22 @@ def preprocess_data(input_file, output_file, scaler_file, apply_scaling=False):
     None.
 
     '''
-    # Load the raw dataset
     df = load_data(input_file)
+    df = drop_missing_observations(df)
     
-    # Drop observations with missing values
-    df = handle_missing_values(df)
-    
-    # Group similar vehicle classes
-    df = group_vehicle_classes(df)
+    # Groups similar vehicle classes - based on different vehicle classes that show similar patterns in fuel consumption
+    df = simplify_vehicle_classes(df)
     
     # Create dummy variables for the vehicle classes
     df = encode_vehicle_class(df)
     
-    # Applies scaling if apply_scaling is set to True
+    # Scales numerical variables to the range [0,1] using minmaxscaler
+    # Minmax scaler is chosen as the numerical variables have different ranges
     scalers = None
     if apply_scaling:
         columns_to_scale = ['ENGINE SIZE', 'CYLINDERS', 'FUEL CONSUMPTION', 'COEMISSIONS ']
         df, scalers = scale_numerical_features(df, columns_to_scale)
     
-    # Outputs the preprocessed data to the path given
     df.to_csv(output_file, index = False)
     
     # Saves the scaler parameters if scaling is used as a pkl file

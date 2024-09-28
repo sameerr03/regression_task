@@ -12,15 +12,30 @@ import os
 
 class LinearRegression:
     def __init__(self):
-        self.coefficiets = None
+        self.coefficients = None
         self.intercept = None
         
     def fit(self, X, Y):
+        '''
+        Fits the multiple linear regression model to the training data. Uses the normal equation to optimize intercept and coefficients. Will cause problems for uninvertable matrices
+
+        Parameters
+        ----------
+        X : np.ndarray
+            2D array of independant variables (feature matrix).
+        Y : np.ndarray
+            1D Array for the target variable - fuel consumption in this case.
+
+        Returns
+        -------
+        None.
+
+        '''
         X = np.c_[np.ones((X.shape[0], 1)), X]
         try:
             self.coefficients = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(Y)
         except np.linalg.LinAlgError:
-            print("Error: Singular Matrix. consider uusing regularization or removing correlated features")
+            print("Error: Matrix is singular. Remove some features.")
         
         self.intercept = self.coefficients[0]
         self.coefficients = self.coefficients[1:]
@@ -47,16 +62,16 @@ def load_pdata(path):
 
 def prepare_data(df, features, target_column):
     '''
-    Splits the preprocessed dataset into the features and target variable for the regression
+    Splits the preprocessed dataset into the features and target variables
 
     Parameters
     ----------
     df : pd.DataFrame
         preprocessed data as a dataframe.
     features : List
-        List of all the features for the regression model.
+        Columns to use as features in the regression
     target_column : str
-        Column of the target variable.
+        Column of the target variable .
 
     Returns
     -------
@@ -70,7 +85,7 @@ def prepare_data(df, features, target_column):
     Y = df[target_column]
     return X,Y
 
-def calculate_mse(y_true, y_pred):
+def calc_mse(y_true, y_pred):
     '''
     Calculates the mean squared error of the regression model
 
@@ -89,7 +104,7 @@ def calculate_mse(y_true, y_pred):
     '''
     return np.mean((y_true - y_pred)**2)
 
-def calculate_rmse(y_true, y_pred):
+def calc_rmse(y_true, y_pred):
     '''
     Calculates Root mean squared error of the regression model
 
@@ -106,9 +121,9 @@ def calculate_rmse(y_true, y_pred):
         Root mean squared error of the model.
 
     '''
-    return np.sqrt(calculate_mse(y_true, y_pred))
+    return np.sqrt(calc_mse(y_true, y_pred))
 
-def calculate_r2(y_true, y_pred):
+def calc_r2(y_true, y_pred):
     '''
     Calculates the R squared score of the regression model
 
@@ -195,10 +210,10 @@ def main():
     # Load the data
     data_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task\data\preprocessed_fuel_train.csv"
     df = load_pdata(data_path)
-    
-    # Determine features used for regression
-    features = ['COEMISSIONS ', 'VC_MID-SIZE', 'VC_PICKUP_TRUCK', 'VC_SMALL_CAR', 'VC_STATION_WAGON', 'VC_SUV',
-           'VC_VAN']
+    # Uses CO emissions and vehicle class dummies to predict fuel consimption
+    features = ['COEMISSIONS ', 'VC_MID-SIZE', 'VC_MINIVAN',
+           'VC_PICKUP_TRUCK', 'VC_SMALL_CAR', 'VC_STATION_WAGON', 'VC_SUV',
+           'VC_VAN', 'VC_VERY_SMALL_CAR']
     target = 'FUEL CONSUMPTION'
     
     # Split the dataset
@@ -217,28 +232,28 @@ def main():
     y_pred = model.predict(X.values)
     
     # Calculate and print model performance metrics
-    mse = calculate_mse(Y.values, y_pred)
-    rmse = calculate_rmse(Y.values, y_pred)
-    r2 = calculate_r2(Y.values, y_pred)
+    mse = calc_mse(Y.values, y_pred)
+    rmse = calc_rmse(Y.values, y_pred)
+    r2 = calc_r2(Y.values, y_pred)
     
     print(f"Mean Squared Error: {mse:.4f}")
     print(f"Root Mean Squared Error: {rmse:.4f}")
     print(f"R-squared Score: {r2:.4f}")
 
     # Save the model
-    model_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task\models\regression_model3.pkl"
+    model_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task\models\regression_model_final.pkl"
     save_model(model, model_path)
-    print(f"Model saved to {model_path}")
+    print(f"Model has been saved at {model_path}")
     
     # Save metrics
-    metrics_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task/results/train_metrics3.txt"
+    metrics_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task/results/train_metrics.txt"
     save_metrics(mse, rmse, r2, metrics_path)
-    print(f"Metrics saved to {metrics_path}")
+    print(f"Traing metrics calculated and stored at {metrics_path}")
   
     # Save predictions
-    predictions_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task/results/train_predictions3.csv"
+    predictions_path = r"C:\Users\samvi\OneDrive\Desktop\Semester\IML\Sameer_Rangwala_A1\regression_task/results/train_predictions.csv"
     save_predictions(y_pred, predictions_path)
-    print(f"Predictions saved to {predictions_path}")
+    print(f"Model predicted values saved to {predictions_path}")
     
 if __name__=="__main__":
     main()
